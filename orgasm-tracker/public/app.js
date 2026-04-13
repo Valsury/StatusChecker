@@ -203,12 +203,14 @@ async function loadAnalytics() {
 
   document.getElementById('analytics-section').style.display = 'block';
 
-  // Streak banner
-  if (data.streak > 1) {
+  // Streak banner — только активная серия
+  if (data.activeStreak > 1) {
     const banner = document.getElementById('streak-banner');
     banner.style.display = 'flex';
     document.getElementById('streak-text').textContent =
-      `${data.streak} дня подряд — ты в огне!`;
+      `${data.activeStreak} дня подряд — ты в огне!`;
+  } else {
+    document.getElementById('streak-banner').style.display = 'none';
   }
 
   drawBarChart('chart-months', {

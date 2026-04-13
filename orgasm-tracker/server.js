@@ -122,13 +122,14 @@ app.get('/api/analytics', async (_req, res) => {
       SELECT rating, COUNT(*) as count FROM records GROUP BY rating ORDER BY rating
     `);
 
-    // Streak — максимальная серия дней подряд за всё время
+    // Streak — максимальная серия за всё время (для достижений)
+    // + текущая серия (для баннера, только если активна сегодня/вчера)
     const dates = await pool.query(`
       SELECT DISTINCT date::date as d FROM records ORDER BY d ASC
     `);
-    let streak = 0;
-    let currentStreak = 0;
+
     let maxStreak = 0;
+    let currentStreak = 0;
 
     for (let i = 0; i < dates.rows.length; i++) {
       if (i === 0) {
@@ -137,18 +138,37 @@ app.get('/api/analytics', async (_req, res) => {
         const prev = new Date(dates.rows[i - 1].d); prev.setHours(0,0,0,0);
         const curr = new Date(dates.rows[i].d);     curr.setHours(0,0,0,0);
         const gap  = Math.round((curr - prev) / 86400000);
-        if (gap === 1) { currentStreak++; }
-        else           { currentStreak = 1; }
+        currentStreak = gap === 1 ? currentStreak + 1 : 1;
       }
       if (currentStreak > maxStreak) maxStreak = currentStreak;
     }
-    streak = maxStreak;
+
+    // Текущая серия — только если последняя запись сегодня или вчера
+    let activeStreak = 0;
+    if (dates.rows.length) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const last  = new Date(dates.rows[dates.rows.length - 1].d); last.setHours(0,0,0,0);
+      const diff  = Math.round((today - last) / 86400000);
+      if (diff <= 1) {
+        // пересчитываем с конца
+        activeStreak = 1;
+        for (let i = dates.rows.length - 2; i >= 0; i--) {
+          const curr = new Date(dates.rows[i + 1].d); curr.setHours(0,0,0,0);
+          const prev = new Date(dates.rows[i].d);     prev.setHours(0,0,0,0);
+          const gap  = Math.round((curr - prev) / 86400000);
+          if (gap === 1) activeStreak++; else break;
+        }
+      }
+    }
+
+    const streak = maxStreak;
 
     res.json({
-      byMonth:   byMonth.rows.reverse(),
-      byWeekday: byWeekday.rows,
+      byMonth:    byMonth.rows.reverse(),
+      byWeekday:  byWeekday.rows,
       ratingDist: ratingDist.rows,
-      streak
+      streak,        // макс. за всё время — для достижений
+      activeStreak,  // текущая активная серия — для баннера
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
