@@ -60,6 +60,20 @@ app.post('/api/records', async (req, res) => {
   }
 });
 
+// PATCH record
+app.patch('/api/records/:id', async (req, res) => {
+  const { date, rating, note, duration_min } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE records SET date=$1, rating=$2, note=$3, duration_min=$4 WHERE id=$5 RETURNING *`,
+      [date, rating, note || null, duration_min || null, req.params.id]
+    );
+    res.json(result.rows[0]);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // DELETE record
 app.delete('/api/records/:id', async (req, res) => {
   try {

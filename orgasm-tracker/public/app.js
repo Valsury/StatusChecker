@@ -1,5 +1,24 @@
 const API = '';
 
+// ===== Theme =====
+const THEMES = ['crimson', 'midnight-rose', 'velvet', 'neon-lust', 'obsidian'];
+const savedTheme = localStorage.getItem('theme') || 'crimson';
+applyTheme(savedTheme);
+
+document.getElementById('theme-switcher').addEventListener('click', (e) => {
+  const dot = e.target.closest('.theme-dot');
+  if (!dot) return;
+  applyTheme(dot.dataset.theme);
+});
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  document.querySelectorAll('.theme-dot').forEach(d => {
+    d.classList.toggle('active', d.dataset.theme === theme);
+  });
+}
+
 // Set today's date as default
 document.getElementById('date').valueAsDate = new Date();
 
@@ -100,33 +119,43 @@ async function loadRecords() {
   }
 
   list.innerHTML = records.map(r => `
-    <div class="record-item" id="rec-${r.id}">
-      <div class="record-rating-badge">
-        ${r.rating}<span>/10</span>
-      </div>
-      <div class="record-info">
-        <div class="record-date">${formatDate(r.date)}</div>
-        <div class="record-meta">
-          ${r.duration_min ? `<span class="meta-chip">⏱ ${r.duration_min} мин</span>` : ''}
-          ${r.mood_before  ? `<span class="meta-chip">до ${moodEmoji(r.mood_before)}</span>` : ''}
-          ${r.mood_after   ? `<span class="meta-chip">после ${moodEmoji(r.mood_after)}</span>` : ''}
+    <div class="record-item-wrap" id="wrap-${r.id}">
+      <div class="swipe-delete-bg">свайп для удаления 🗑️</div>
+      <div class="record-item" id="rec-${r.id}" data-id="${r.id}">
+        <div class="record-rating-badge">
+          ${r.rating}<span>/10</span>
         </div>
-        ${r.tags && r.tags.length ? `<div class="record-tags">${r.tags.map(t => `<span class="record-tag">${t}</span>`).join('')}</div>` : ''}
-        ${r.note ? `<div class="record-note">${escapeHtml(r.note)}</div>` : ''}
-        <div class="record-stars">${starsFor(r.rating)}</div>
+        <div class="record-info">
+          <div class="record-date">${formatDate(r.date)}</div>
+          <div class="record-meta">
+            ${r.duration_min ? `<span class="meta-chip">⏱ ${r.duration_min} мин</span>` : ''}
+            ${r.mood_before  ? `<span class="meta-chip">до ${moodEmoji(r.mood_before)}</span>` : ''}
+            ${r.mood_after   ? `<span class="meta-chip">после ${moodEmoji(r.mood_after)}</span>` : ''}
+          </div>
+          ${r.tags && r.tags.length ? `<div class="record-tags">${r.tags.map(t => `<span class="record-tag">${t}</span>`).join('')}</div>` : ''}
+          ${r.note ? `<div class="record-note">${escapeHtml(r.note)}</div>` : ''}
+          <div class="record-stars">${starsFor(r.rating)}</div>
+        </div>
+        <div class="record-actions">
+          <button class="btn-edit"   onclick="openEditPopup(${r.id})" title="редактировать">✏️</button>
+          <button class="btn-delete" onclick="confirmDelete(${r.id})" title="удалить">🗑️</button>
+        </div>
       </div>
-      <button class="btn-delete" onclick="deleteRecord(${r.id})" title="удалить">🗑️</button>
     </div>
   `).join('');
+
+  // Attach swipe listeners
+  list.querySelectorAll('.record-item').forEach(el => attachSwipe(el));
 }
 
 async function deleteRecord(id) {
-  const el = document.getElementById(`rec-${id}`);
-  if (el) { el.style.opacity = '0.4'; el.style.transform = 'scale(0.97)'; }
-
-  await fetch(`${API}/api/records/${id}`, { method: 'DELETE' });
-  showToast('удалено');
-  loadStats(); loadRecords(); loadAnalytics(); loadCalendar(); loadFunFeatures();
+  const wrap = document.getElementById(`wrap-${id}`) || document.getElementById(`rec-${id}`);
+  if (wrap) { wrap.style.opacity = '0'; wrap.style.transform = 'translateX(-100%)'; wrap.style.transition = 'all 0.3s ease'; }
+  setTimeout(async () => {
+    await fetch(`${API}/api/records/${id}`, { method: 'DELETE' });
+    showToast('удалено');
+    loadStats(); loadRecords(); loadAnalytics(); loadCalendar(); loadFunFeatures();
+  }, 280);
 }
 
 function formatDate(dateStr) {
@@ -582,4 +611,105 @@ function closeAchPopup(e) {
   if (e.target === document.getElementById('ach-popup')) {
     document.getElementById('ach-popup').style.display = 'none';
   }
+}
+
+// ===== UX Features =====
+
+// --- Confirm delete ---
+let _pendingDeleteId = null;
+
+function confirmDelete(id) {
+  _pendingDeleteId = id;
+  document.getElementById('confirm-popup').style.display = 'flex';
+}
+
+document.getElementById('confirm-delete-btn').addEventListener('click', () => {
+  document.getElementById('confirm-popup').style.display = 'none';
+  if (_pendingDeleteId) { deleteRecord(_pendingDeleteId); _pendingDeleteId = null; }
+});
+
+function closeConfirm(e) {
+  if (!e || e.target === document.getElementById('confirm-popup')) {
+    document.getElementById('confirm-popup').style.display = 'none';
+    _pendingDeleteId = null;
+  }
+}
+
+// --- Edit popup ---
+const editRatingInput = document.getElementById('edit-rating');
+editRatingInput.addEventListener('input', () => {
+  document.getElementById('edit-rating-display').textContent = editRatingInput.value;
+});
+
+async function openEditPopup(id) {
+  const res = await fetch(`${API}/api/records`);
+  const records = await res.json();
+  const r = records.find(x => x.id === id);
+  if (!r) return;
+
+  document.getElementById('edit-id').value       = r.id;
+  document.getElementById('edit-date').value     = r.date.slice(0, 10);
+  editRatingInput.value                          = r.rating;
+  document.getElementById('edit-rating-display').textContent = r.rating;
+  document.getElementById('edit-note').value     = r.note || '';
+  document.getElementById('edit-duration').value = r.duration_min || '';
+  document.getElementById('edit-popup').style.display = 'flex';
+}
+
+document.getElementById('edit-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id           = document.getElementById('edit-id').value;
+  const date         = document.getElementById('edit-date').value;
+  const rating       = parseInt(editRatingInput.value);
+  const note         = document.getElementById('edit-note').value.trim();
+  const duration_min = parseInt(document.getElementById('edit-duration').value) || null;
+
+  await fetch(`${API}/api/records/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ date, rating, note, duration_min })
+  });
+
+  document.getElementById('edit-popup').style.display = 'none';
+  showToast('обновлено ✨');
+  loadStats(); loadRecords(); loadAnalytics(); loadCalendar(); loadFunFeatures();
+});
+
+function closeEditPopup(e) {
+  if (!e || e.target === document.getElementById('edit-popup')) {
+    document.getElementById('edit-popup').style.display = 'none';
+  }
+}
+
+// --- Swipe to delete ---
+function attachSwipe(el) {
+  let startX = 0, currentX = 0, dragging = false;
+  const THRESHOLD = 80;
+
+  el.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    dragging = true;
+    el.style.transition = 'none';
+  }, { passive: true });
+
+  el.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    currentX = e.touches[0].clientX - startX;
+    if (currentX < 0) {
+      el.style.transform = `translateX(${Math.max(currentX, -120)}px)`;
+    }
+  }, { passive: true });
+
+  el.addEventListener('touchend', () => {
+    dragging = false;
+    el.style.transition = 'transform 0.25s ease';
+    if (currentX < -THRESHOLD) {
+      const id = parseInt(el.dataset.id);
+      el.style.transform = 'translateX(-120px)';
+      setTimeout(() => confirmDelete(id), 150);
+    } else {
+      el.style.transform = 'translateX(0)';
+    }
+    currentX = 0;
+  });
 }

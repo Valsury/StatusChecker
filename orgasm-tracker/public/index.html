@@ -22,6 +22,13 @@
       <div class="header-icon">💋</div>
       <h1>O·Tracker</h1>
       <p class="subtitle">твой личный дневник удовольствий</p>
+      <div class="theme-switcher" id="theme-switcher">
+        <button class="theme-dot active" data-theme="crimson"      title="Crimson"></button>
+        <button class="theme-dot"        data-theme="midnight-rose" title="Midnight Rose"></button>
+        <button class="theme-dot"        data-theme="velvet"        title="Velvet"></button>
+        <button class="theme-dot"        data-theme="neon-lust"     title="Neon Lust"></button>
+        <button class="theme-dot"        data-theme="obsidian"      title="Obsidian"></button>
+      </div>
     </header>
 
     <!-- Stats -->
@@ -184,6 +191,51 @@
       <h2><span class="accent">♥</span> история</h2>
       <div id="records-list"></div>
     </section>
+    <!-- Edit popup -->
+    <div class="ach-popup-overlay" id="edit-popup" style="display:none" onclick="closeEditPopup(event)">
+      <div class="ach-popup-inner edit-popup-inner">
+        <h3 class="edit-popup-title">редактировать запись</h3>
+        <form id="edit-form">
+          <input type="hidden" id="edit-id" />
+          <div class="form-group">
+            <label for="edit-date">дата</label>
+            <input type="date" id="edit-date" required />
+          </div>
+          <div class="form-group">
+            <label>оценка: <span id="edit-rating-display" class="accent">5</span> / 10</label>
+            <input type="range" id="edit-rating" min="1" max="10" value="5" />
+          </div>
+          <div class="form-group">
+            <label for="edit-note">заметка</label>
+            <textarea id="edit-note" rows="2" placeholder="как это было..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="edit-duration">продолжительность (мин)</label>
+            <input type="number" id="edit-duration" min="1" max="999" placeholder="например, 30" />
+          </div>
+          <div style="display:flex;gap:10px;margin-top:4px">
+            <button type="button" class="btn-cancel" onclick="closeEditPopup()">отмена</button>
+            <button type="submit" class="btn-primary" style="flex:1">сохранить 🔥</button>
+          </div>
+        </form>
+        <button class="btn-close" onclick="closeEditPopup()">✕</button>
+      </div>
+    </div>
+
+    <!-- Confirm delete -->
+    <div class="ach-popup-overlay" id="confirm-popup" style="display:none" onclick="closeConfirm(event)">
+      <div class="ach-popup-inner confirm-inner">
+        <div class="ach-popup-emoji">🗑️</div>
+        <div class="ach-popup-title">удалить запись?</div>
+        <div class="ach-popup-desc">это действие нельзя отменить</div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn-cancel" onclick="closeConfirm()">отмена</button>
+          <button class="btn-danger" id="confirm-delete-btn">удалить</button>
+        </div>
+        <button class="btn-close" onclick="closeConfirm()">✕</button>
+      </div>
+    </div>
+
     <!-- Achievement popup -->
     <div class="ach-popup-overlay" id="ach-popup" style="display:none" onclick="closeAchPopup(event)">
       <div class="ach-popup-inner">
