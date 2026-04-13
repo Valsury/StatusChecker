@@ -44,6 +44,55 @@
       </div>
     </div>
 
+    <!-- Analytics -->
+    <div class="card analytics-card" id="analytics-section" style="display:none">
+      <h2><span class="accent">📊</span> аналитика</h2>
+
+      <div class="streak-banner" id="streak-banner" style="display:none">
+        <span class="streak-fire">🔥</span>
+        <span id="streak-text"></span>
+      </div>
+
+      <div class="analytics-block">
+        <div class="analytics-label">активность по месяцам</div>
+        <canvas id="chart-months" height="120"></canvas>
+      </div>
+
+      <div class="analytics-row">
+        <div class="analytics-block half">
+          <div class="analytics-label">оценки</div>
+          <canvas id="chart-ratings" height="100"></canvas>
+        </div>
+        <div class="analytics-block half">
+          <div class="analytics-label">дни недели</div>
+          <canvas id="chart-weekdays" height="100"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="card calendar-card">
+      <div class="calendar-header">
+        <button class="cal-nav" id="cal-prev">‹</button>
+        <h2 id="cal-title" class="cal-title"></h2>
+        <button class="cal-nav" id="cal-next">›</button>
+      </div>
+      <div class="cal-weekdays">
+        <span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span>сб</span><span>вс</span>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+
+    <!-- Day popup -->
+    <div class="day-popup" id="day-popup" style="display:none">
+      <div class="day-popup-inner">
+        <div class="day-popup-date" id="popup-date"></div>
+        <div class="day-popup-records" id="popup-records"></div>
+        <button class="btn-primary" id="popup-add-btn">+ добавить запись на этот день</button>
+        <button class="btn-close" id="popup-close">✕</button>
+      </div>
+    </div>
+
     <!-- Form -->
     <div class="card form-card">
       <h2><span class="accent">+</span> новая запись</h2>
