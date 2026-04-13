@@ -858,3 +858,128 @@ input[type="number"]:focus {
   border-radius: 20px;
   padding: 2px 8px;
 }
+
+/* ===== Dry spell counter ===== */
+.dry-spell-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.dry-spell-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(255,45,85,0.3));
+}
+
+.dry-spell-info { display: flex; flex-direction: column; gap: 2px; }
+
+.dry-spell-days {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--red), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+}
+
+.dry-spell-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ===== Achievements ===== */
+.achievements-card { padding-bottom: 20px; }
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.achievement {
+  border-radius: var(--radius-sm);
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-align: center;
+  cursor: default;
+  transition: transform 0.2s;
+}
+
+.achievement:hover { transform: scale(1.05); }
+
+.achievement.unlocked {
+  background: linear-gradient(135deg, rgba(255,45,85,0.12), rgba(155,29,234,0.1));
+  border: 1px solid rgba(255,45,85,0.25);
+  box-shadow: 0 0 12px rgba(255,45,85,0.1);
+}
+
+.achievement.locked {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  opacity: 0.45;
+}
+
+.ach-emoji { font-size: 1.6rem; line-height: 1; }
+
+.ach-title {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+.achievement.unlocked .ach-title { color: var(--pink); }
+
+/* ===== Compliment popup ===== */
+.compliment-popup {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 300;
+  display: flex;
+  justify-content: center;
+  padding-top: 60px;
+  pointer-events: none;
+}
+
+.compliment-inner {
+  background: linear-gradient(135deg, var(--red-deep), rgba(155,29,234,0.9));
+  border: 1px solid rgba(255,45,85,0.4);
+  border-radius: var(--radius);
+  padding: 20px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 8px 40px rgba(255,45,85,0.4);
+  transform: translateY(-20px) scale(0.9);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+}
+
+.compliment-popup.show .compliment-inner {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.compliment-emoji { font-size: 2.4rem; line-height: 1; }
+
+.compliment-text {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: white;
+  text-align: center;
+}

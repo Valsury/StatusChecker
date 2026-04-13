@@ -40,6 +40,7 @@ document.querySelectorAll('.mood-btn').forEach(btn => {
 loadStats();
 loadRecords();
 loadAnalytics();
+loadFunFeatures();
 
 // Form submit
 document.getElementById('record-form').addEventListener('submit', async (e) => {
@@ -72,7 +73,8 @@ document.getElementById('record-form').addEventListener('submit', async (e) => {
     document.getElementById('mood-before-display').textContent = '—';
     document.getElementById('mood-after-display').textContent  = '—';
     showToast('сохранено ✨');
-    loadStats(); loadRecords(); loadAnalytics(); loadCalendar();
+    showCompliment(rating);
+    loadStats(); loadRecords(); loadAnalytics(); loadCalendar(); loadFunFeatures();
   }
 });
 
@@ -124,10 +126,7 @@ async function deleteRecord(id) {
 
   await fetch(`${API}/api/records/${id}`, { method: 'DELETE' });
   showToast('удалено');
-  loadStats();
-  loadRecords();
-  loadAnalytics();
-  loadCalendar();
+  loadStats(); loadRecords(); loadAnalytics(); loadCalendar(); loadFunFeatures();
 }
 
 function formatDate(dateStr) {
@@ -414,4 +413,151 @@ loadCalendar();
 const _origLoadRecords = loadRecords;
 async function refreshAll() {
   await Promise.all([loadStats(), loadRecords(), loadAnalytics(), loadCalendar()]);
+}
+
+// ===== Fun Features =====
+
+// --- Compliments ---
+const COMPLIMENTS = [
+  { emoji: '🔥', text: 'ты просто огонь!' },
+  { emoji: '💋', text: 'мммм, записано~' },
+  { emoji: '😈', text: 'нехорошая ты... нехорошая 😏' },
+  { emoji: '✨', text: 'ещё один момент в истории' },
+  { emoji: '💦', text: 'жарко тут стало' },
+  { emoji: '🌹', text: 'красиво живёшь' },
+  { emoji: '👑', text: 'королева удовольствий' },
+  { emoji: '🎯', text: 'цель достигнута 😏' },
+  { emoji: '🌙', text: 'ночь удалась' },
+  { emoji: '⚡', text: 'заряд получен!' },
+];
+
+const HIGH_RATING_COMPLIMENTS = [
+  { emoji: '🤩', text: '10 из 10, не иначе как шедевр' },
+  { emoji: '🏆', text: 'это войдёт в историю' },
+  { emoji: '💫', text: 'такое бывает раз в жизни... или чаще 😏' },
+  { emoji: '🎆', text: 'фейерверк засчитан!' },
+];
+
+function showCompliment(rating) {
+  const pool = rating >= 9 ? HIGH_RATING_COMPLIMENTS : COMPLIMENTS;
+  const c = pool[Math.floor(Math.random() * pool.length)];
+
+  const popup = document.getElementById('compliment-popup');
+  document.getElementById('compliment-emoji').textContent = c.emoji;
+  document.getElementById('compliment-text').textContent  = c.text;
+
+  popup.style.display = 'flex';
+  popup.classList.add('show');
+
+  setTimeout(() => {
+    popup.classList.remove('show');
+    setTimeout(() => { popup.style.display = 'none'; }, 400);
+  }, 2200);
+}
+
+// --- Achievements ---
+const ACHIEVEMENTS = [
+  { id: 'first',      emoji: '🌸', title: 'первый раз',        desc: 'добавила первую запись',          check: (s) => s.total >= 1 },
+  { id: 'ten',        emoji: '🔥', title: '10 раз',            desc: '10 записей в дневнике',           check: (s) => s.total >= 10 },
+  { id: 'fifty',      emoji: '💯', title: '50 раз',            desc: 'полсотни — серьёзно!',            check: (s) => s.total >= 50 },
+  { id: 'perfect',    emoji: '💎', title: 'идеально',          desc: 'оценка 10/10',                    check: (s) => s.best >= 10 },
+  { id: 'highavg',    emoji: '📈', title: 'высокая планка',    desc: 'средняя оценка выше 8',           check: (s) => s.avg >= 8 },
+  { id: 'streak3',    emoji: '⚡', title: '3 дня подряд',      desc: 'три дня без перерыва',            check: (s) => s.streak >= 3 },
+  { id: 'streak7',    emoji: '🌶️', title: 'неделя огня',       desc: '7 дней подряд',                   check: (s) => s.streak >= 7 },
+  { id: 'quickie',    emoji: '💨', title: 'quickie-мастер',    desc: 'использован тег quickie',         check: (s) => s.tags.includes('quickie') },
+  { id: 'toys',       emoji: '🎀', title: 'игрушечница',       desc: 'использован тег игрушки',         check: (s) => s.tags.includes('игрушки') },
+  { id: 'longplay',   emoji: '🕯️', title: 'марафонец',         desc: 'запись дольше 60 минут',          check: (s) => s.maxDuration >= 60 },
+  { id: 'moodboost',  emoji: '🥰', title: 'mood booster',      desc: 'настроение выросло после',        check: (s) => s.moodBoosts >= 3 },
+];
+
+async function loadFunFeatures() {
+  const [statsRes, recordsRes, analyticsRes] = await Promise.all([
+    fetch(`${API}/api/stats`),
+    fetch(`${API}/api/records`),
+    fetch(`${API}/api/analytics`),
+  ]);
+  const stats    = await statsRes.json();
+  const records  = await recordsRes.json();
+  const analytics = await analyticsRes.json();
+
+  if (!records.length) return;
+
+  // Build summary for achievement checks
+  const allTags = records.flatMap(r => r.tags || []);
+  const maxDuration = Math.max(...records.map(r => r.duration_min || 0));
+  const moodBoosts  = records.filter(r => r.mood_after && r.mood_before && r.mood_after > r.mood_before).length;
+
+  const summary = {
+    total:       parseInt(stats.total),
+    best:        parseInt(stats.best_rating),
+    avg:         parseFloat(stats.avg_rating),
+    streak:      analytics.streak || 0,
+    tags:        allTags,
+    maxDuration,
+    moodBoosts,
+  };
+
+  // Dry spell counter
+  renderDrySpell(stats.last_date);
+
+  // Achievements
+  renderAchievements(summary);
+}
+
+function renderDrySpell(lastDateStr) {
+  if (!lastDateStr) return;
+  const card = document.getElementById('dry-spell-card');
+  const last = new Date(lastDateStr); last.setHours(0,0,0,0);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = Math.round((today - last) / 86400000);
+
+  card.style.display = 'flex';
+
+  if (days === 0) {
+    document.getElementById('dry-spell-icon').textContent = '❤️‍🔥';
+    document.getElementById('dry-spell-days').textContent = 'сегодня!';
+    document.getElementById('dry-spell-label').textContent = 'ты уже отметилась сегодня 😏';
+  } else if (days === 1) {
+    document.getElementById('dry-spell-icon').textContent = '😏';
+    document.getElementById('dry-spell-days').textContent = 'вчера';
+    document.getElementById('dry-spell-label').textContent = 'совсем недавно было~';
+  } else if (days <= 3) {
+    document.getElementById('dry-spell-icon').textContent = '🌶️';
+    document.getElementById('dry-spell-days').textContent = `${days} дня назад`;
+    document.getElementById('dry-spell-label').textContent = 'пора бы снова 😈';
+  } else if (days <= 7) {
+    document.getElementById('dry-spell-icon').textContent = '🌵';
+    document.getElementById('dry-spell-days').textContent = `${days} дней без`;
+    document.getElementById('dry-spell-label').textContent = 'засуха начинается...';
+  } else {
+    document.getElementById('dry-spell-icon').textContent = '🏜️';
+    document.getElementById('dry-spell-days').textContent = `${days} дней без`;
+    document.getElementById('dry-spell-label').textContent = 'пустыня. серьёзная пустыня.';
+  }
+}
+
+function renderAchievements(summary) {
+  const section = document.getElementById('achievements-section');
+  const grid    = document.getElementById('achievements-grid');
+
+  const unlocked = ACHIEVEMENTS.filter(a => a.check(summary));
+  const locked   = ACHIEVEMENTS.filter(a => !a.check(summary));
+
+  if (!unlocked.length && !locked.length) return;
+  section.style.display = 'block';
+
+  grid.innerHTML = [
+    ...unlocked.map(a => `
+      <div class="achievement unlocked" title="${a.desc}">
+        <span class="ach-emoji">${a.emoji}</span>
+        <span class="ach-title">${a.title}</span>
+      </div>
+    `),
+    ...locked.map(a => `
+      <div class="achievement locked" title="${a.desc}">
+        <span class="ach-emoji">🔒</span>
+        <span class="ach-title">${a.title}</span>
+      </div>
+    `),
+  ].join('');
 }
