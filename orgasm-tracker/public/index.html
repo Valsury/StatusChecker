@@ -151,28 +151,31 @@
         </div>
 
         <!-- Mood -->
-        <div class="form-row">
-          <div class="form-group half">
-            <label>настроение до: <span id="mood-before-display" class="accent">—</span></label>
-            <div class="mood-picker" id="mood-before-picker">
-              <button type="button" class="mood-btn" data-target="mood_before" data-val="1">😔</button>
-              <button type="button" class="mood-btn" data-target="mood_before" data-val="2">😐</button>
-              <button type="button" class="mood-btn" data-target="mood_before" data-val="3">🙂</button>
-              <button type="button" class="mood-btn" data-target="mood_before" data-val="4">😊</button>
-              <button type="button" class="mood-btn" data-target="mood_before" data-val="5">🥰</button>
+        <div class="form-group">
+          <label>настроение</label>
+          <div class="mood-row">
+            <div class="mood-group">
+              <label style="margin-bottom:4px">до: <span id="mood-before-display" class="accent">—</span></label>
+              <div class="mood-picker">
+                <button type="button" class="mood-btn" data-target="mood_before" data-val="1">😔</button>
+                <button type="button" class="mood-btn" data-target="mood_before" data-val="2">😐</button>
+                <button type="button" class="mood-btn" data-target="mood_before" data-val="3">🙂</button>
+                <button type="button" class="mood-btn" data-target="mood_before" data-val="4">😊</button>
+                <button type="button" class="mood-btn" data-target="mood_before" data-val="5">🥰</button>
+              </div>
+              <input type="hidden" id="mood_before" value="" />
             </div>
-            <input type="hidden" id="mood_before" value="" />
-          </div>
-          <div class="form-group half">
-            <label>настроение после: <span id="mood-after-display" class="accent">—</span></label>
-            <div class="mood-picker" id="mood-after-picker">
-              <button type="button" class="mood-btn" data-target="mood_after" data-val="1">😔</button>
-              <button type="button" class="mood-btn" data-target="mood_after" data-val="2">😐</button>
-              <button type="button" class="mood-btn" data-target="mood_after" data-val="3">🙂</button>
-              <button type="button" class="mood-btn" data-target="mood_after" data-val="4">😊</button>
-              <button type="button" class="mood-btn" data-target="mood_after" data-val="5">🥰</button>
+            <div class="mood-group">
+              <label style="margin-bottom:4px">после: <span id="mood-after-display" class="accent">—</span></label>
+              <div class="mood-picker">
+                <button type="button" class="mood-btn" data-target="mood_after" data-val="1">😔</button>
+                <button type="button" class="mood-btn" data-target="mood_after" data-val="2">😐</button>
+                <button type="button" class="mood-btn" data-target="mood_after" data-val="3">🙂</button>
+                <button type="button" class="mood-btn" data-target="mood_after" data-val="4">😊</button>
+                <button type="button" class="mood-btn" data-target="mood_after" data-val="5">🥰</button>
+              </div>
+              <input type="hidden" id="mood_after" value="" />
             </div>
-            <input type="hidden" id="mood_after" value="" />
           </div>
         </div>
 
