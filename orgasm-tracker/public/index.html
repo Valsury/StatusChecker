@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#6b3fa0" />
+  <meta name="theme-color" content="#1a0010" />
   <link rel="manifest" href="manifest.json" />
-  <title>✨ Pleasure Tracker</title>
+  <title>💋 O-Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -17,12 +19,13 @@
 
   <div class="container">
     <header>
-      <h1>✨ Pleasure Tracker</h1>
+      <div class="header-icon">💋</div>
+      <h1>O·Tracker</h1>
       <p class="subtitle">твой личный дневник удовольствий</p>
     </header>
 
     <!-- Stats -->
-    <div class="stats-grid" id="stats">
+    <div class="stats-grid">
       <div class="stat-card">
         <span class="stat-value" id="stat-total">—</span>
         <span class="stat-label">всего раз</span>
@@ -43,34 +46,34 @@
 
     <!-- Form -->
     <div class="card form-card">
-      <h2>+ новая запись</h2>
+      <h2><span class="accent">+</span> новая запись</h2>
       <form id="record-form">
         <div class="form-group">
           <label for="date">дата</label>
           <input type="date" id="date" required />
         </div>
         <div class="form-group">
-          <label>оценка: <span id="rating-display">5</span>/10</label>
+          <label>оценка: <span id="rating-display" class="accent">5</span> / 10</label>
           <div class="rating-slider">
             <input type="range" id="rating" min="1" max="10" value="5" />
             <div class="rating-emojis">
-              <span>😐</span><span>😊</span><span>😍</span><span>🤩</span><span>💫</span>
+              <span>😐</span><span>🥵</span><span>😈</span><span>🔥</span><span>💦</span>
             </div>
           </div>
         </div>
         <div class="form-group">
-          <label for="note">заметка (необязательно)</label>
-          <textarea id="note" placeholder="как это было..." rows="2"></textarea>
+          <label for="note">заметка <span class="muted">(необязательно)</span></label>
+          <textarea id="note" placeholder="расскажи как это было..." rows="2"></textarea>
         </div>
-        <button type="submit" class="btn-primary">сохранить ✨</button>
+        <button type="submit" class="btn-primary">сохранить 🔥</button>
       </form>
     </div>
 
     <!-- Records list -->
-    <div class="records-section">
-      <h2>история</h2>
+    <section class="records-section">
+      <h2><span class="accent">♥</span> история</h2>
       <div id="records-list"></div>
-    </div>
+    </section>
   </div>
 
   <script src="app.js"></script>
