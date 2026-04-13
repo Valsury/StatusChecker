@@ -739,3 +739,122 @@ canvas {
 }
 
 .btn-close:hover { border-color: var(--red); color: var(--red); }
+
+/* ===== Extended form ===== */
+.form-row {
+  display: flex;
+  gap: 14px;
+}
+
+.form-group.half { flex: 1; min-width: 0; }
+
+input[type="number"] {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+
+input[type="number"]:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-glow);
+}
+
+/* ===== Tags ===== */
+.tags-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-btn {
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  color: var(--text-secondary);
+  padding: 7px 14px;
+  border-radius: 50px;
+  font-size: 0.82rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.tag-btn:hover {
+  border-color: var(--border-hot);
+  color: var(--text-primary);
+  transform: scale(1.04);
+}
+
+.tag-btn.active {
+  background: linear-gradient(135deg, rgba(255,45,85,0.2), rgba(155,29,234,0.15));
+  border-color: var(--red);
+  color: var(--pink);
+  box-shadow: 0 0 10px rgba(255,45,85,0.2);
+}
+
+/* ===== Mood picker ===== */
+.mood-picker {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.mood-btn {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 1.3rem;
+  padding: 8px 4px;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.15s;
+  line-height: 1;
+}
+
+.mood-btn:hover  { transform: scale(1.15); border-color: var(--border-hot); }
+.mood-btn.active {
+  border-color: var(--red);
+  box-shadow: 0 0 10px rgba(255,45,85,0.3);
+  transform: scale(1.1);
+}
+
+/* ===== Record meta & tags ===== */
+.record-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.meta-chip {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+.record-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.record-tag {
+  font-size: 0.72rem;
+  color: var(--pink);
+  background: rgba(255,107,157,0.1);
+  border: 1px solid rgba(255,107,157,0.2);
+  border-radius: 20px;
+  padding: 2px 8px;
+}

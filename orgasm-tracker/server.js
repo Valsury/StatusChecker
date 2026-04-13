@@ -18,9 +18,22 @@ pool.query(`
     date DATE NOT NULL,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 10),
     note TEXT,
+    tags TEXT[],
+    mood_before INTEGER CHECK (mood_before >= 1 AND mood_before <= 5),
+    mood_after  INTEGER CHECK (mood_after  >= 1 AND mood_after  <= 5),
+    duration_min INTEGER,
     created_at TIMESTAMP DEFAULT NOW()
   )
-`).catch(console.error);
+`).then(() => {
+  // migrate existing table — add columns if missing
+  return pool.query(`
+    ALTER TABLE records
+      ADD COLUMN IF NOT EXISTS tags TEXT[],
+      ADD COLUMN IF NOT EXISTS mood_before INTEGER,
+      ADD COLUMN IF NOT EXISTS mood_after  INTEGER,
+      ADD COLUMN IF NOT EXISTS duration_min INTEGER
+  `);
+}).catch(console.error);
 
 // GET all records
 app.get('/api/records', async (req, res) => {
@@ -34,11 +47,12 @@ app.get('/api/records', async (req, res) => {
 
 // POST new record
 app.post('/api/records', async (req, res) => {
-  const { date, rating, note } = req.body;
+  const { date, rating, note, tags, mood_before, mood_after, duration_min } = req.body;
   try {
     const result = await pool.query(
-      'INSERT INTO records (date, rating, note) VALUES ($1, $2, $3) RETURNING *',
-      [date, rating, note || null]
+      `INSERT INTO records (date, rating, note, tags, mood_before, mood_after, duration_min)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [date, rating, note || null, tags || null, mood_before || null, mood_after || null, duration_min || null]
     );
     res.json(result.rows[0]);
   } catch (e) {

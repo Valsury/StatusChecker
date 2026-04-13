@@ -10,6 +10,32 @@ ratingInput.addEventListener('input', () => {
   ratingDisplay.textContent = ratingInput.value;
 });
 
+// ===== Tags =====
+const selectedTags = new Set();
+document.querySelectorAll('.tag-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tag = btn.dataset.tag;
+    if (selectedTags.has(tag)) { selectedTags.delete(tag); btn.classList.remove('active'); }
+    else                        { selectedTags.add(tag);    btn.classList.add('active'); }
+  });
+});
+
+// ===== Mood pickers =====
+const moodState = { mood_before: null, mood_after: null };
+document.querySelectorAll('.mood-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.target;
+    const val    = parseInt(btn.dataset.val);
+    moodState[target] = val;
+    document.getElementById(target).value = val;
+    const display = target === 'mood_before' ? 'mood-before-display' : 'mood-after-display';
+    document.getElementById(display).textContent = btn.textContent;
+    // highlight
+    document.querySelectorAll(`.mood-btn[data-target="${target}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
 // Load on start
 loadStats();
 loadRecords();
@@ -18,25 +44,35 @@ loadAnalytics();
 // Form submit
 document.getElementById('record-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const date   = document.getElementById('date').value;
-  const rating = parseInt(ratingInput.value);
-  const note   = document.getElementById('note').value.trim();
+  const date        = document.getElementById('date').value;
+  const rating      = parseInt(ratingInput.value);
+  const note        = document.getElementById('note').value.trim();
+  const tags        = selectedTags.size ? [...selectedTags] : null;
+  const mood_before = moodState.mood_before;
+  const mood_after  = moodState.mood_after;
+  const duration_min = parseInt(document.getElementById('duration_min').value) || null;
 
   const res = await fetch(`${API}/api/records`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ date, rating, note })
+    body: JSON.stringify({ date, rating, note, tags, mood_before, mood_after, duration_min })
   });
 
   if (res.ok) {
     document.getElementById('note').value = '';
+    document.getElementById('duration_min').value = '';
     ratingInput.value = 5;
     ratingDisplay.textContent = '5';
+    selectedTags.clear();
+    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+    moodState.mood_before = null; moodState.mood_after = null;
+    document.getElementById('mood_before').value = '';
+    document.getElementById('mood_after').value  = '';
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('mood-before-display').textContent = '—';
+    document.getElementById('mood-after-display').textContent  = '—';
     showToast('сохранено ✨');
-    loadStats();
-    loadRecords();
-    loadAnalytics();
-    loadCalendar();
+    loadStats(); loadRecords(); loadAnalytics(); loadCalendar();
   }
 });
 
@@ -68,6 +104,12 @@ async function loadRecords() {
       </div>
       <div class="record-info">
         <div class="record-date">${formatDate(r.date)}</div>
+        <div class="record-meta">
+          ${r.duration_min ? `<span class="meta-chip">⏱ ${r.duration_min} мин</span>` : ''}
+          ${r.mood_before  ? `<span class="meta-chip">до ${moodEmoji(r.mood_before)}</span>` : ''}
+          ${r.mood_after   ? `<span class="meta-chip">после ${moodEmoji(r.mood_after)}</span>` : ''}
+        </div>
+        ${r.tags && r.tags.length ? `<div class="record-tags">${r.tags.map(t => `<span class="record-tag">${t}</span>`).join('')}</div>` : ''}
         ${r.note ? `<div class="record-note">${escapeHtml(r.note)}</div>` : ''}
         <div class="record-stars">${starsFor(r.rating)}</div>
       </div>
@@ -96,6 +138,10 @@ function formatDate(dateStr) {
 function starsFor(rating) {
   const filled = Math.round(rating / 2);
   return '💜'.repeat(filled) + '🤍'.repeat(5 - filled);
+}
+
+function moodEmoji(val) {
+  return ['😔','😐','🙂','😊','🥰'][val - 1] || '—';
 }
 
 function escapeHtml(str) {
@@ -290,7 +336,7 @@ function renderCalendar() {
       <div class="cal-day ${isToday ? 'today' : ''} ${hasRec ? 'has-record' : ''} ${glowClass}"
            data-date="${dateStr}" onclick="openDayPopup('${dateStr}')">
         <span class="cal-day-num">${d}</span>
-        ${hasRec ? `<span class="cal-heart" title="${records.length} запис${records.length === 1 ? 'ь' : 'и'}">🔥❤️</span>` : ''}
+        ${hasRec ? `<span class="cal-heart" title="${records.length} запис${records.length === 1 ? 'ь' : 'и'}">❤️‍🔥</span>` : ''}
       </div>`;
   }
 
@@ -331,6 +377,9 @@ function openDayPopup(dateStr) {
       <div class="popup-record">
         <span class="popup-badge">${r.rating}/10</span>
         <span class="popup-stars">${starsFor(r.rating)}</span>
+        ${r.duration_min ? `<span class="popup-badge" style="background:rgba(255,179,71,0.2);color:var(--gold)">⏱ ${r.duration_min} мин</span>` : ''}
+        ${r.tags && r.tags.length ? `<div class="record-tags" style="width:100%;margin-top:6px">${r.tags.map(t=>`<span class="record-tag">${t}</span>`).join('')}</div>` : ''}
+        ${r.mood_before || r.mood_after ? `<div style="font-size:0.8rem;color:var(--text-secondary);width:100%;margin-top:4px">${r.mood_before ? `до ${moodEmoji(r.mood_before)}` : ''} ${r.mood_after ? `→ после ${moodEmoji(r.mood_after)}` : ''}</div>` : ''}
         ${r.note ? `<span class="popup-note">${escapeHtml(r.note)}</span>` : ''}
       </div>
     `).join('');

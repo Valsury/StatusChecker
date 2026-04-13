@@ -114,6 +114,52 @@
           <label for="note">заметка <span class="muted">(необязательно)</span></label>
           <textarea id="note" placeholder="расскажи как это было..." rows="2"></textarea>
         </div>
+
+        <!-- Tags -->
+        <div class="form-group">
+          <label>теги</label>
+          <div class="tags-grid">
+            <button type="button" class="tag-btn" data-tag="соло">🤍 соло</button>
+            <button type="button" class="tag-btn" data-tag="с партнёром">👫 с партнёром</button>
+            <button type="button" class="tag-btn" data-tag="quickie">⚡ quickie</button>
+            <button type="button" class="tag-btn" data-tag="долго">🕯️ долго</button>
+            <button type="button" class="tag-btn" data-tag="игрушки">🎀 игрушки</button>
+            <button type="button" class="tag-btn" data-tag="спонтанно">💥 спонтанно</button>
+          </div>
+        </div>
+
+        <!-- Mood -->
+        <div class="form-row">
+          <div class="form-group half">
+            <label>настроение до: <span id="mood-before-display" class="accent">—</span></label>
+            <div class="mood-picker" id="mood-before-picker">
+              <button type="button" class="mood-btn" data-target="mood_before" data-val="1">😔</button>
+              <button type="button" class="mood-btn" data-target="mood_before" data-val="2">😐</button>
+              <button type="button" class="mood-btn" data-target="mood_before" data-val="3">🙂</button>
+              <button type="button" class="mood-btn" data-target="mood_before" data-val="4">😊</button>
+              <button type="button" class="mood-btn" data-target="mood_before" data-val="5">🥰</button>
+            </div>
+            <input type="hidden" id="mood_before" value="" />
+          </div>
+          <div class="form-group half">
+            <label>настроение после: <span id="mood-after-display" class="accent">—</span></label>
+            <div class="mood-picker" id="mood-after-picker">
+              <button type="button" class="mood-btn" data-target="mood_after" data-val="1">😔</button>
+              <button type="button" class="mood-btn" data-target="mood_after" data-val="2">😐</button>
+              <button type="button" class="mood-btn" data-target="mood_after" data-val="3">🙂</button>
+              <button type="button" class="mood-btn" data-target="mood_after" data-val="4">😊</button>
+              <button type="button" class="mood-btn" data-target="mood_after" data-val="5">🥰</button>
+            </div>
+            <input type="hidden" id="mood_after" value="" />
+          </div>
+        </div>
+
+        <!-- Duration -->
+        <div class="form-group">
+          <label for="duration_min">продолжительность <span class="muted">(минут, необязательно)</span></label>
+          <input type="number" id="duration_min" min="1" max="999" placeholder="например, 30" />
+        </div>
+
         <button type="submit" class="btn-primary">сохранить 🔥</button>
       </form>
     </div>
