@@ -122,24 +122,27 @@ app.get('/api/analytics', async (_req, res) => {
       SELECT rating, COUNT(*) as count FROM records GROUP BY rating ORDER BY rating
     `);
 
-    // Streak — текущая серия (дней подряд с записями)
+    // Streak — максимальная серия дней подряд за всё время
     const dates = await pool.query(`
-      SELECT DISTINCT date::date as d FROM records ORDER BY d DESC
+      SELECT DISTINCT date::date as d FROM records ORDER BY d ASC
     `);
     let streak = 0;
-    if (dates.rows.length) {
-      const today = new Date(); today.setHours(0,0,0,0);
-      let cursor = new Date(dates.rows[0].d); cursor.setHours(0,0,0,0);
-      const diff = Math.round((today - cursor) / 86400000);
-      if (diff <= 1) {
-        streak = 1;
-        for (let i = 1; i < dates.rows.length; i++) {
-          const prev = new Date(dates.rows[i].d); prev.setHours(0,0,0,0);
-          const gap  = Math.round((cursor - prev) / 86400000);
-          if (gap === 1) { streak++; cursor = prev; } else break;
-        }
+    let currentStreak = 0;
+    let maxStreak = 0;
+
+    for (let i = 0; i < dates.rows.length; i++) {
+      if (i === 0) {
+        currentStreak = 1;
+      } else {
+        const prev = new Date(dates.rows[i - 1].d); prev.setHours(0,0,0,0);
+        const curr = new Date(dates.rows[i].d);     curr.setHours(0,0,0,0);
+        const gap  = Math.round((curr - prev) / 86400000);
+        if (gap === 1) { currentStreak++; }
+        else           { currentStreak = 1; }
       }
+      if (currentStreak > maxStreak) maxStreak = currentStreak;
     }
+    streak = maxStreak;
 
     res.json({
       byMonth:   byMonth.rows.reverse(),

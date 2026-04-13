@@ -198,6 +198,8 @@ header h1 {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: 1;
+  word-break: break-word;
+  text-align: center;
 }
 
 .stat-label {
@@ -527,7 +529,7 @@ input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.2); }
 .analytics-block.half { flex: 1; min-width: 0; }
 .analytics-row { display: flex; gap: 14px; margin-bottom: 4px; }
 .analytics-label { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
-canvas { width: 100%; display: block; border-radius: 6px; }
+canvas { width: 100% !important; display: block; border-radius: 6px; max-height: 120px; }
 
 /* ===== Calendar ===== */
 .calendar-card { padding-bottom: 16px; }

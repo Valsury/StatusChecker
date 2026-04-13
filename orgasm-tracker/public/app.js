@@ -105,7 +105,7 @@ async function loadStats() {
   document.getElementById('stat-avg').textContent   = s.avg_rating || '—';
   document.getElementById('stat-best').textContent  = s.best_rating || '—';
   document.getElementById('stat-last').textContent  = s.last_date
-    ? formatDate(s.last_date) : '—';
+    ? formatDateShort(s.last_date) : '—';
 }
 
 async function loadRecords() {
@@ -161,6 +161,11 @@ async function deleteRecord(id) {
 function formatDate(dateStr) {
   const d = new Date(dateStr);
   return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function formatDateShort(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
 }
 
 function starsFor(rating) {
@@ -245,11 +250,13 @@ function drawBarChart(canvasId, { labels, values, color }) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
-  // Retina support
   const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.getBoundingClientRect();
-  const W = rect.width || canvas.parentElement.clientWidth || 280;
+  // Always use the fixed height attribute; width from parent element
   const H = parseInt(canvas.getAttribute('height')) || 120;
+  const parent = canvas.parentElement;
+  const W = Math.min(parent ? parent.clientWidth || 300 : 300, 560);
+
+  if (W <= 0) return; // not rendered yet, skip
 
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
