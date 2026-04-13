@@ -1,0 +1,11 @@
+{
+  "name": "Pleasure Tracker",
+  "short_name": "Pleasure",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdf6ec",
+  "theme_color": "#6b3fa0",
+  "icons": [
+    { "src": "icon.png", "sizes": "192x192", "type": "image/png" }
+  ]
+}

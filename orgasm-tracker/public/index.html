@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#6b3fa0" />
+  <link rel="manifest" href="manifest.json" />
+  <title>✨ Pleasure Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>✨ Pleasure Tracker</h1>
+      <p class="subtitle">твой личный дневник удовольствий</p>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="stats">
+      <div class="stat-card">
+        <span class="stat-value" id="stat-total">—</span>
+        <span class="stat-label">всего раз</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="stat-avg">—</span>
+        <span class="stat-label">средняя оценка</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="stat-best">—</span>
+        <span class="stat-label">лучшая оценка</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="stat-last">—</span>
+        <span class="stat-label">последний раз</span>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="card form-card">
+      <h2>+ новая запись</h2>
+      <form id="record-form">
+        <div class="form-group">
+          <label for="date">дата</label>
+          <input type="date" id="date" required />
+        </div>
+        <div class="form-group">
+          <label>оценка: <span id="rating-display">5</span>/10</label>
+          <div class="rating-slider">
+            <input type="range" id="rating" min="1" max="10" value="5" />
+            <div class="rating-emojis">
+              <span>😐</span><span>😊</span><span>😍</span><span>🤩</span><span>💫</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="note">заметка (необязательно)</label>
+          <textarea id="note" placeholder="как это было..." rows="2"></textarea>
+        </div>
+        <button type="submit" class="btn-primary">сохранить ✨</button>
+      </form>
+    </div>
+
+    <!-- Records list -->
+    <div class="records-section">
+      <h2>история</h2>
+      <div id="records-list"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
