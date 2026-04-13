@@ -457,18 +457,20 @@ function showCompliment(rating) {
 
 // --- Achievements ---
 const ACHIEVEMENTS = [
-  { id: 'first',      emoji: '🌸', title: 'первый раз',        desc: 'добавила первую запись',          check: (s) => s.total >= 1 },
-  { id: 'ten',        emoji: '🔥', title: '10 раз',            desc: '10 записей в дневнике',           check: (s) => s.total >= 10 },
-  { id: 'fifty',      emoji: '💯', title: '50 раз',            desc: 'полсотни — серьёзно!',            check: (s) => s.total >= 50 },
-  { id: 'perfect',    emoji: '💎', title: 'идеально',          desc: 'оценка 10/10',                    check: (s) => s.best >= 10 },
-  { id: 'highavg',    emoji: '📈', title: 'высокая планка',    desc: 'средняя оценка выше 8',           check: (s) => s.avg >= 8 },
-  { id: 'streak3',    emoji: '⚡', title: '3 дня подряд',      desc: 'три дня без перерыва',            check: (s) => s.streak >= 3 },
-  { id: 'streak7',    emoji: '🌶️', title: 'неделя огня',       desc: '7 дней подряд',                   check: (s) => s.streak >= 7 },
-  { id: 'quickie',    emoji: '💨', title: 'quickie-мастер',    desc: 'использован тег quickie',         check: (s) => s.tags.includes('quickie') },
-  { id: 'toys',       emoji: '🎀', title: 'игрушечница',       desc: 'использован тег игрушки',         check: (s) => s.tags.includes('игрушки') },
-  { id: 'longplay',   emoji: '🕯️', title: 'марафонец',         desc: 'запись дольше 60 минут',          check: (s) => s.maxDuration >= 60 },
-  { id: 'moodboost',  emoji: '🥰', title: 'mood booster',      desc: 'настроение выросло после',        check: (s) => s.moodBoosts >= 3 },
+  { id: 'first',     emoji: '🌸', title: 'первый раз',      desc: 'добавь первую запись',           condition: 'первая запись в дневнике',      check: (s) => s.total >= 1,        unlockedAt: (r) => r.sort((a,b)=>a.date>b.date?1:-1)[0]?.date },
+  { id: 'ten',       emoji: '🔥', title: '10 раз',          desc: 'накопи 10 записей',              condition: '10 записей в дневнике',         check: (s) => s.total >= 10,       unlockedAt: (r) => r.sort((a,b)=>a.date>b.date?1:-1)[9]?.date },
+  { id: 'fifty',     emoji: '💯', title: '50 раз',          desc: 'накопи 50 записей',              condition: '50 записей — серьёзно!',        check: (s) => s.total >= 50,       unlockedAt: (r) => r.sort((a,b)=>a.date>b.date?1:-1)[49]?.date },
+  { id: 'perfect',   emoji: '💎', title: 'идеально',        desc: 'поставь оценку 10/10',           condition: 'хотя бы одна оценка 10/10',     check: (s) => s.best >= 10,        unlockedAt: (r) => r.find(x => x.rating >= 10)?.date },
+  { id: 'highavg',   emoji: '📈', title: 'высокая планка',  desc: 'средняя оценка выше 8',          condition: 'средняя оценка ≥ 8',            check: (s) => s.avg >= 8,          unlockedAt: (r) => null },
+  { id: 'streak3',   emoji: '⚡', title: '3 дня подряд',    desc: 'добавляй записи 3 дня подряд',   condition: '3 дня подряд с записями',       check: (s) => s.streak >= 3,       unlockedAt: (r) => null },
+  { id: 'streak7',   emoji: '🌶️', title: 'неделя огня',     desc: 'добавляй записи 7 дней подряд', condition: '7 дней подряд с записями',      check: (s) => s.streak >= 7,       unlockedAt: (r) => null },
+  { id: 'quickie',   emoji: '💨', title: 'quickie-мастер',  desc: 'добавь тег "quickie"',           condition: 'использован тег quickie',       check: (s) => s.tags.includes('quickie'),  unlockedAt: (r) => r.find(x => x.tags?.includes('quickie'))?.date },
+  { id: 'toys',      emoji: '🎀', title: 'игрушечница',     desc: 'добавь тег "игрушки"',           condition: 'использован тег игрушки',       check: (s) => s.tags.includes('игрушки'), unlockedAt: (r) => r.find(x => x.tags?.includes('игрушки'))?.date },
+  { id: 'longplay',  emoji: '🕯️', title: 'марафонец',       desc: 'укажи продолжительность 60+ мин','condition': 'запись дольше 60 минут',      check: (s) => s.maxDuration >= 60, unlockedAt: (r) => r.find(x => (x.duration_min||0) >= 60)?.date },
+  { id: 'moodboost', emoji: '🥰', title: 'mood booster',    desc: 'настроение после выше, чем до — 3 раза', condition: 'настроение выросло после (3 раза)', check: (s) => s.moodBoosts >= 3, unlockedAt: (r) => null },
 ];
+
+let _achRecords = []; // cache for popup
 
 async function loadFunFeatures() {
   const [statsRes, recordsRes, analyticsRes] = await Promise.all([
@@ -476,32 +478,30 @@ async function loadFunFeatures() {
     fetch(`${API}/api/records`),
     fetch(`${API}/api/analytics`),
   ]);
-  const stats    = await statsRes.json();
-  const records  = await recordsRes.json();
+  const stats     = await statsRes.json();
+  const records   = await recordsRes.json();
   const analytics = await analyticsRes.json();
 
   if (!records.length) return;
 
-  // Build summary for achievement checks
-  const allTags = records.flatMap(r => r.tags || []);
+  _achRecords = records;
+
+  const allTags     = records.flatMap(r => r.tags || []);
   const maxDuration = Math.max(...records.map(r => r.duration_min || 0));
   const moodBoosts  = records.filter(r => r.mood_after && r.mood_before && r.mood_after > r.mood_before).length;
 
   const summary = {
-    total:       parseInt(stats.total),
-    best:        parseInt(stats.best_rating),
-    avg:         parseFloat(stats.avg_rating),
-    streak:      analytics.streak || 0,
-    tags:        allTags,
+    total:    parseInt(stats.total),
+    best:     parseInt(stats.best_rating),
+    avg:      parseFloat(stats.avg_rating),
+    streak:   analytics.streak || 0,
+    tags:     allTags,
     maxDuration,
     moodBoosts,
   };
 
-  // Dry spell counter
   renderDrySpell(stats.last_date);
-
-  // Achievements
-  renderAchievements(summary);
+  renderAchievements(summary, records);
 }
 
 function renderDrySpell(lastDateStr) {
@@ -536,28 +536,50 @@ function renderDrySpell(lastDateStr) {
   }
 }
 
-function renderAchievements(summary) {
+function renderAchievements(summary, records) {
   const section = document.getElementById('achievements-section');
   const grid    = document.getElementById('achievements-grid');
+
+  section.style.display = 'block';
 
   const unlocked = ACHIEVEMENTS.filter(a => a.check(summary));
   const locked   = ACHIEVEMENTS.filter(a => !a.check(summary));
 
-  if (!unlocked.length && !locked.length) return;
-  section.style.display = 'block';
-
   grid.innerHTML = [
-    ...unlocked.map(a => `
-      <div class="achievement unlocked" title="${a.desc}">
+    ...unlocked.map(a => {
+      const dateStr = a.unlockedAt(records);
+      const dateLabel = dateStr ? formatDate(dateStr) : '';
+      return `<div class="achievement unlocked" onclick="openAchPopup('${a.id}', true, '${dateLabel}')">
         <span class="ach-emoji">${a.emoji}</span>
         <span class="ach-title">${a.title}</span>
-      </div>
-    `),
+        ${dateLabel ? `<span class="ach-date">${dateLabel}</span>` : ''}
+      </div>`;
+    }),
     ...locked.map(a => `
-      <div class="achievement locked" title="${a.desc}">
+      <div class="achievement locked" onclick="openAchPopup('${a.id}', false, '')">
         <span class="ach-emoji">🔒</span>
         <span class="ach-title">${a.title}</span>
       </div>
     `),
   ].join('');
+}
+
+function openAchPopup(id, isUnlocked, dateLabel) {
+  const a = ACHIEVEMENTS.find(x => x.id === id);
+  if (!a) return;
+
+  document.getElementById('ach-popup-emoji').textContent = isUnlocked ? a.emoji : '🔒';
+  document.getElementById('ach-popup-title').textContent = a.title;
+  document.getElementById('ach-popup-desc').textContent  = a.condition;
+  document.getElementById('ach-popup-date').textContent  = isUnlocked
+    ? (dateLabel ? `получено: ${dateLabel}` : 'получено ✓')
+    : 'ещё не получено';
+  document.getElementById('ach-popup-date').className = 'ach-popup-date ' + (isUnlocked ? 'unlocked' : 'locked');
+  document.getElementById('ach-popup').style.display = 'flex';
+}
+
+function closeAchPopup(e) {
+  if (e.target === document.getElementById('ach-popup')) {
+    document.getElementById('ach-popup').style.display = 'none';
+  }
 }

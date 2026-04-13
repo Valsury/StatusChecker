@@ -184,6 +184,17 @@
       <h2><span class="accent">♥</span> история</h2>
       <div id="records-list"></div>
     </section>
+    <!-- Achievement popup -->
+    <div class="ach-popup-overlay" id="ach-popup" style="display:none" onclick="closeAchPopup(event)">
+      <div class="ach-popup-inner">
+        <div class="ach-popup-emoji" id="ach-popup-emoji"></div>
+        <div class="ach-popup-title" id="ach-popup-title"></div>
+        <div class="ach-popup-desc"  id="ach-popup-desc"></div>
+        <div class="ach-popup-date"  id="ach-popup-date"></div>
+        <button class="btn-close" onclick="document.getElementById('ach-popup').style.display='none'">✕</button>
+      </div>
+    </div>
+
     <!-- Compliment popup -->
     <div class="compliment-popup" id="compliment-popup" style="display:none">
       <div class="compliment-inner">

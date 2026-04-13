@@ -983,3 +983,82 @@ input[type="number"]:focus {
   color: white;
   text-align: center;
 }
+
+/* ===== Achievement popup ===== */
+.ach-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+}
+
+.ach-popup-inner {
+  background: var(--surface);
+  border: 1px solid var(--border-hot);
+  border-radius: var(--radius);
+  padding: 36px 28px 28px;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 0 60px rgba(255,45,85,0.2);
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ach-popup-emoji {
+  font-size: 3.5rem;
+  line-height: 1;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 16px rgba(255,45,85,0.4));
+}
+
+.ach-popup-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.ach-popup-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.ach-popup-date {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 50px;
+}
+
+.ach-popup-date.unlocked {
+  background: linear-gradient(135deg, rgba(255,45,85,0.15), rgba(155,29,234,0.1));
+  border: 1px solid rgba(255,45,85,0.3);
+  color: var(--pink);
+}
+
+.ach-popup-date.locked {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+/* date under unlocked achievement card */
+.ach-date {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.achievement { cursor: pointer; }
